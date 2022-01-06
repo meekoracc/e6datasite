@@ -4,11 +4,15 @@ import * as d3 from 'd3';
 import PieChart from './PieChart.vue';
 
 interface e6PostInterface {
-  '_id': number,
-  'created_at': number,
-  'rating': string,
-  'artist': Array<string>,
-  'character': Array<string>
+  _id: number,
+  created_at: number,
+  rating: string,
+  artist: Array<string>,
+  character: Array<string>
+}
+
+function getUnique(table:Array<e6PostInterface>, attribute:string) {
+  return new Set(table.flatMap(x => x[attribute]));
 }
 
 const selected = ref([])
@@ -22,8 +26,6 @@ onMounted(() => {
   const svg = d3.select(".histgram")
     .append("svg")
       .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-      // .attr("width", width + margin.left + margin.right)
-      // .attr("height", height + margin.top + margin.bottom)
     .append("g")
       .attr("transform",
             `translate(${margin.left}, ${margin.top})`);
@@ -94,6 +96,7 @@ onMounted(() => {
     }
 
     const showDetail = function(event,d) {
+      console.log(getUnique(data, 'character'));
       selected.value = d;
     }
 
@@ -122,7 +125,7 @@ onMounted(() => {
   </div>
   <div>
     <div v-if="selected.length > 0">
-      <PieChart :chart-data="selected" />
+      <!-- <PieChart :chart-data="selected" :radius="250" :radius_inner="200"/> -->
     </div>
     <div v-else>
       Select a bar for more info

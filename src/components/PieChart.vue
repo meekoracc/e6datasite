@@ -3,18 +3,19 @@ import { onMounted, onUpdated } from 'vue';
 import * as d3 from 'd3';
 import {nest} from 'd3-collection';
 
-const props = defineProps<{ chartData: Array<any> }>()
+interface Props {
+  pieData: any
+  radius: number
+  radius_inner?: number
+}
 
-var margin = {top: 10, right: 30, bottom: 30, left: 40},
-    width = 450 - margin.left - margin.right,
-    height = 450 - margin.top - margin.bottom;
-
-// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
-const radius = Math.min(width, height) / 2;
+const props = withDefaults(defineProps<Props>(), {
+  radius_inner: 0
+});
 
 const arc = d3.arc()
-              .innerRadius(radius - 50)
-              .outerRadius(radius)
+              .innerRadius(props.radius_inner)
+              .outerRadius(props.radius)
 
 // Count instances of each character
 function countUnique(table:Array<string>, entry) {
@@ -23,6 +24,10 @@ function countUnique(table:Array<string>, entry) {
   });
   return table;
 }
+
+// set the color scale
+const color = d3.scaleOrdinal()
+  .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
 
 onUpdated(() => {
   const data = nest().key(d => d).rollup(d => d.length).entries(props.chartData.reduce(countUnique, new Array<string>()));
@@ -59,14 +64,10 @@ onMounted(() => {
   // append the svg object to the div called 'my_dataviz'
   const svg = d3.select(".piechart")
     .append("svg")
-      .attr("width", width)
-      .attr("height", height)
+      .attr("width", props.radius * 2)
+      .attr("height", props.radius * 2)
     .append("g")
-      .attr("transform", `translate(${width/2}, ${height/2})`);
-
-  // set the color scale
-  const color = d3.scaleOrdinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+      .attr("transform", `translate(${props.radius}, ${props.radius})`);
 
   const data = nest().key(d => d).rollup(d => d.length).entries(props.chartData.reduce(countUnique, new Array<string>()));
 
