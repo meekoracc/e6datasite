@@ -95,9 +95,17 @@ onMounted(() => {
         .style("opacity", 0)
     }
 
-    const showDetail = function(event,d) {
-      console.log(getUnique(data, 'character'));
-      selected.value = d;
+    const showDetail = function(event,d:Array<any>) {
+      let labels = getUnique(data, 'character');
+      let flatList = d.flatMap(x => x['character']);
+      let map = new Map(d3.rollup(flatList, g => g.length, d => d).entries())
+      labels.forEach(x => {
+        if(!map.has(x)) {
+          map.set(x, 0);
+        }
+      })
+      console.log(map);
+      selected.value = map;
     }
 
     // append the bar rectangles to the svg element
@@ -124,8 +132,8 @@ onMounted(() => {
     <div class="histgram"></div>
   </div>
   <div>
-    <div v-if="selected.length > 0">
-      <!-- <PieChart :chart-data="selected" :radius="250" :radius_inner="200"/> -->
+    <div v-if="selected.size > 0">
+      <PieChart :pie-data="selected" :radius="250" :radius_inner="200"/>
     </div>
     <div v-else>
       Select a bar for more info

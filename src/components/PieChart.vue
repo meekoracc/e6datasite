@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUpdated } from 'vue';
 import * as d3 from 'd3';
-import {nest} from 'd3-collection';
 
 interface Props {
-  pieData: any
+  pieData: Map<string, number>
   radius: number
   radius_inner?: number
 }
@@ -17,24 +16,16 @@ const arc = d3.arc()
               .innerRadius(props.radius_inner)
               .outerRadius(props.radius)
 
-// Count instances of each character
-function countUnique(table:Array<string>, entry) {
-  entry['character'].forEach((element:string) => {
-    table.push(element);
-  });
-  return table;
-}
-
 // set the color scale
 const color = d3.scaleOrdinal()
   .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
 
 onUpdated(() => {
-  const data = nest().key(d => d).rollup(d => d.length).entries(props.chartData.reduce(countUnique, new Array<string>()));
+  const data = props.pieData;
 
   // Compute the position of each group on the pie:
   const pie = d3.pie()
-    .value(function(d) {return d.value});
+    .value(function(d) {return d[1];});
   const data_ready = pie(data);
 
   let path = d3.select(".piechart")
@@ -69,11 +60,11 @@ onMounted(() => {
     .append("g")
       .attr("transform", `translate(${props.radius}, ${props.radius})`);
 
-  const data = nest().key(d => d).rollup(d => d.length).entries(props.chartData.reduce(countUnique, new Array<string>()));
+  const data = props.pieData;
 
   // Compute the position of each group on the pie:
   const pie = d3.pie()
-    .value(function(d) {return d.value});
+    .value(function(d) {return d[1];});
   const data_ready = pie(data);
 
   console.log(data_ready);
